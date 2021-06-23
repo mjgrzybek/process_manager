@@ -49,44 +49,43 @@ It acts as a server to clients implemented using _Library_.
 _Library_ exposed using GRPC.
 #### Protobuf
 [../proto/process_manager.proto](../proto/process_manager.proto)
-#### Security
-- mtls
-    - cipher suites:
-        - src: https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
-        - TLS1.3 or TLS1.2 are the only valid choices
-        - cipher suite ordered by: security, compatibility, performance
-        ```
-        TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-        TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
-        TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-        TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-        TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-        TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-        TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-        TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-        TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-        TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
-        TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
-        TLS_DHE_RSA_WITH_AES_128_CBC_SHA
-        TLS_DHE_RSA_WITH_AES_256_CBC_SHA
-        TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-        TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
-        ```
 #### Authentication
-HTTP Basic Authentication with hardcoded user/password for demo purposes
+mTLS Authentication
+- cipher suites:
+    - src: https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
+    - TLS1.3 or TLS1.2 are the only valid choices
+    - cipher suite ordered by: security, compatibility, performance
+    ```
+    TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+    TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+    ```
 #### Authorization
 Simple RBAC system.\
-Predefined roles
+Predefined roles.
 
 | ROLE  |  start  | stop  | status  | output  | stream |
 |---|---|---|---|---|---|
-| admin  | x  | x  | x  |x   |x  |
+| admin  | x  | x  | x  | x   | x  |
 | user  |   |   | x  | x  |  |
 | streamer  |   |   | x  | x  | x |
-CLI user is considered `admin`.
+CLI: user is considered `admin`.\
+GRPC: Roles are preassigned to certificates for demo purposes.
 ### CLI
 _Library_ exposed to command line users.\
 All CLI's output is printed to `stdout`, including requested process's log stream.\
