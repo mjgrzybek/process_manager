@@ -83,9 +83,9 @@ Predefined roles.
 |---|---|---|---|---|---|
 | admin  | x  | x  | x  | x   | x  |
 | user  |   |   | x  | x  |  |
-| streamer  |   |   | x  | x  | x |
+| streamer  |   |  | x |   | x |
 
-Roles are preassigned to certificates for demo purposes.
+Roles are preassigned to client's certificates for demo purposes.
 ### CLI
 _Library_ exposed to command line users.\
 All CLI's output is printed to `stdout`, including requested process's log stream.\
@@ -109,6 +109,8 @@ User is considered an `admin`.
 | User provides wrong credentials | HTTP 403 |
 | Worker runs out of memory due to excessive processes logging | worker dies, unsupported scenario |
 | Multiple processes sharing PID (at different time) | PID mapped on UUID, it's ok |
+| Double `stop` request | Second request is rejected |
+| Double `output` request | It's ok, output is returned twice |
 
 
 # Technical design
@@ -120,7 +122,8 @@ Process running on host in background.
 - listen for connections on a socket, handle them asynchronously
 - process instance is represented as UUID in a map held by worker
 - `start` request, if succeeded, creates `UUID`
-- other requests use `UUID` as key, they require `UUID_mutex` to be unlocked
+  - writes to map are synchronized
+- other requests use `UUID` as key, no data races should occur if multiple requests are handled in parallel
 - `stop` request acquires `UUID_mutex`
     - waits until process is stopped or until hardcoded timeout
     - `UUID` is marked as stopped, but user can still get an output or status
