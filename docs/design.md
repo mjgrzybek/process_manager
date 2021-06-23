@@ -75,9 +75,18 @@ _Library_ exposed using GRPC.
         TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
         TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
         ```
-- simple auth scheme
-    - basic auth with hardcoded user/password for demo purposes
-    - no RBAC 
+#### Authentication
+HTTP Basic Authentication with hardcoded user/password for demo purposes
+#### Authorization
+Simple RBAC system.\
+Predefined roles
+
+| ROLE  |  start  | stop  | status  | output  | stream |
+|---|---|---|---|---|---|
+| admin  | x  | x  | x  |x   |x  |
+| user  |   |   | x  | x  |  |
+| streamer  |   |   | x  | x  | x |
+CLI user is considered `admin`.
 ### CLI
 _Library_ exposed to command line users.\
 All CLI's output is printed to `stdout`, including requested process's log stream.\
