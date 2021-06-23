@@ -85,15 +85,15 @@ Predefined roles.
 | user  |   |   | x  | x  |  |
 | streamer  |   |   | x  | x  | x |
 
-CLI: user is considered `admin`.\
-GRPC: Roles are preassigned to certificates for demo purposes.
+Roles are preassigned to certificates for demo purposes.
 ### CLI
 _Library_ exposed to command line users.\
 All CLI's output is printed to `stdout`, including requested process's log stream.\
 User can stop stream using `SIGINT` (ctrl+c) signal.
-#### Security
+#### Authentication
 Authentication is not needed - user is already authenticated to OS it's logged in.
-
+#### Authorization
+User is considered an `admin`.
 # Use cases
 | case | expected result |
 | --- | --- |
