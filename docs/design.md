@@ -92,12 +92,11 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 
 # Technical design
 ## Service
-Process running on host.
+Process running on host in background.
 ### Communication
 - unix socket for CLI
-- GRPC server for GRPC clients (https)
 ### Architecture
-- listen for connections on socket, handle them asynchronously
+- listen for connections on a socket, handle them asynchronously
 - process instance is represented as UUID in a map held by service
 - `start` request creates `UUID`
 - other requests use `UUID`, they require `UUID_mutex` to be unlocked
