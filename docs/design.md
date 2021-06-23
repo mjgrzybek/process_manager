@@ -24,17 +24,17 @@ Processes output is stored in memory which imposes output size restrictions.\
 Processes output is handled as bytes. Caller should convert it to expected encoding.
 
 ## Basic sequence diagrams
-![](drawings/start.svg) 
+![](drawings/start.png) 
 
-![](drawings/stop.svg)
+![](drawings/stop.png)
 
-![](drawings/output.svg)
+![](drawings/output.png)
 
-![](drawings/stream.svg)
+![](drawings/stream.png)
 
 ## Components
 
-![Components](drawings/components.svg)
+![Components](drawings/components.png)
 ### Service 
 Thats's the `process_manager`'s engine. Functionalities' logic is implemented here.\
 It talks to the OS and maps PIDs to UUIDs.\
@@ -48,9 +48,17 @@ _Library_ exposed using GRPC.
 #### Protobuf
 - TODO
 #### Security
-- TODO mtls
-- TOOD cipher suites
-- TODO simple auth scheme
+- mtls
+    - tls1.3
+    - safe and recommended cipher suites
+    ```
+    TLS_AES_256_GCM_SHA384
+    TLS_CHACHA20_POLY1305_SHA256
+    TLS_AES_128_GCM_SHA256
+    ```
+- simple auth scheme
+    - basic auth with hardcoded user/password for demo purposes
+    - no RBAC 
 ### CLI
 _Library_ exposed to command line users.\
 All CLI's output is printed to `stdout`, including requested process's log stream.\
@@ -67,9 +75,20 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 | User requests process to be stopped; but it won't stop | process is not stopped; process status is returned |
 | User requests process status | process is stopped; exit code is returned |
 | User requests process output | output is returned |
+| User provides wrong credentials | HTTP 403 |
 
 # Technical design
 ## Service
+Process running on host.
+### Communication
+- unix socket for CLI
+- GRPC server for GRPC clients (https)
+### Architecture
+- listen for connections, handle them asynchronously
+- process instance is represented as UUID in a map held by service
+- `start` request creates `UUID`
+- other requests use `UUID`
+    - should 
 
 ## Library
 ## GRPC API
