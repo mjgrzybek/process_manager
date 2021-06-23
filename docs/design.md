@@ -84,6 +84,7 @@ Predefined roles.
 | admin  | x  | x  | x  | x   | x  |
 | user  |   |   | x  | x  |  |
 | streamer  |   |   | x  | x  | x |
+
 CLI: user is considered `admin`.\
 GRPC: Roles are preassigned to certificates for demo purposes.
 ### CLI
