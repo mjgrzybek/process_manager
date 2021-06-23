@@ -2,19 +2,27 @@ Design doc
 ========================
 
 # Functional requirements
-`process_manager` is a tool that manages processes.\
+`process_manager` is a tool that manages processes on Linux.\
 In order to provide full functionality, managed processes must be started using this tool.\
 Clients (_Library_, _GRPC_, _CLI_) use UUID instead of PID to avoid collisions.
 
 It provides abilities to:
 * start a process
+    * TODO: to what extent should it be flexible?
+        * executable name
+        * executable path
+        * environment variables
+        * arguments
 * stop a process
 * query status of a process
 * handle process output
     * get output atomically
     * stream output
 
-It's expected to work on 64-bit Linux.
+Processes are run as user who's running the _Service_.\
+Processes output is stored in memory which imposes output size restrictions.\
+Processes output is handled as bytes. Caller should convert it to expected encoding.
+
 ## Basic sequence diagrams
 ![](drawings/start.svg) 
 
@@ -24,27 +32,30 @@ It's expected to work on 64-bit Linux.
 
 ![](drawings/stream.svg)
 
-## Service 
-Thats's a `process_manager` engine. Functionalities are implemented here.\
+## Components
+
+![Components](drawings/components.svg)
+### Service 
+Thats's the `process_manager`'s engine. Functionalities' logic is implemented here.\
 It talks to the OS and maps PIDs to UUIDs.\
 It acts as a server to clients implemented using _Library_.
 
-## Library
-Library = `process_manger` client API in Go.
+### Library
+`process_manger`'s client API in Go.
 
-## GRPC API
+### GRPC API
 _Library_ exposed using GRPC.
-### Protobuf
+#### Protobuf
 - TODO
-### Security
+#### Security
 - TODO mtls
 - TOOD cipher suites
 - TODO simple auth scheme
-## CLI
+### CLI
 _Library_ exposed to command line users.\
-All process' output is printed to `stdout`, including log stream.\
+All CLI's output is printed to `stdout`, including requested process's log stream.\
 User can stop stream using `SIGINT` (ctrl+c) signal.
-### Security
+#### Security
 Authentication is not needed - user is already authenticated to OS it's logged in.
 
 # Use cases
@@ -58,7 +69,6 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 | User requests process output | output is returned |
 
 # Technical design
-![Components](drawings/components.svg)
 ## Service
 
 ## Library
