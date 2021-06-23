@@ -22,7 +22,7 @@ It provides abilities to:
     * get output from start until _now_
     * stream output from _now_
 
-Processes are run as user who's running the _Service_.\
+Processes are run as user who's running the _Worker_.\
 Processes output is stored in memory which imposes output size restrictions.\
 Processes output is handled as bytes. Caller should convert it to expected encoding.
 
@@ -38,7 +38,7 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 ## Components
 
 ![Components](drawings/components.png)
-### Service 
+### Worker 
 Thats's the `process_manager`'s engine. Functionalities' logic is implemented here.\
 It talks to the OS and maps PIDs to UUIDs.\
 It acts as a server to clients implemented using _Library_.
@@ -84,6 +84,7 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 | --- | --- |
 | User requests process to be started | process is started; process UUID is returned |
 | User requests process to be started; but it won't start | process isn't started; OS response is returned |
+| User requests process to be started; but it won't start | process isn't started; OS response is returned |
 | User requests process to be stopped | process is stopped; exit code is returned |
 | User requests process to be stopped; but it won't stop | process is not stopped; process status is returned |
 | User requests process status | process is stopped; exit code is returned |
@@ -91,13 +92,13 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 | User provides wrong credentials | HTTP 403 |
 
 # Technical design
-## Service
+## Worker
 Process running on host in background.
 ### Communication
 - unix socket for CLI
 ### Architecture
 - listen for connections on a socket, handle them asynchronously
-- process instance is represented as UUID in a map held by service
+- process instance is represented as UUID in a map held by worker
 - `start` request creates `UUID`
 - other requests use `UUID`, they require `UUID_mutex` to be unlocked
 - `stop` request should acquire `UUID_mutex`
@@ -105,12 +106,12 @@ Process running on host in background.
     - removes `UUID` from map
 
 ## Library
-Provides connection to _Service_ using unix socket.\
-Proxy to _Service_'s functionalities.
+Provides connection to _Worker_ using unix socket.\
+Proxy to _Worker_'s functionalities that should be client facing.
 ## GRPC Server
 Exposes GRPC API on hardcoded port (8080).
-Uses _Library_ to connect to the _Service_.
+Uses _Library_ to connect to the _Worker_.
 ## CLI
 CLI is generated with `"github.com/spf13/cobra"`\
-Commands are implemented 1:1 with _Library_.\
-_Library_ is used to connect to the _Service_.
+Commands cover all _Library_ functions.\
+_Library_ is used to connect to the _Worker_.
