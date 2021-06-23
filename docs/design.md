@@ -97,13 +97,21 @@ Process running on host.
 - unix socket for CLI
 - GRPC server for GRPC clients (https)
 ### Architecture
-- listen for connections, handle them asynchronously
+- listen for connections on socket, handle them asynchronously
 - process instance is represented as UUID in a map held by service
 - `start` request creates `UUID`
-- other requests use `UUID`
-    - should 
+- other requests use `UUID`, they require `UUID_mutex` to be unlocked
+- `stop` request should acquire `UUID_mutex`
+    - waits until process is stopped or until hardcoded timeout
+    - removes `UUID` from map
 
 ## Library
-## GRPC API
+Provides connection to _Service_ using unix socket.\
+Proxy to _Service_'s functionalities.
+## GRPC Server
+Exposes GRPC API on hardcoded port (8080).
+Uses _Library_ to connect to the _Service_.
 ## CLI
-# Milestones
+CLI is generated with `"github.com/spf13/cobra"`\
+Commands are implemented 1:1 with _Library_.\
+_Library_ is used to connect to the _Service_.
