@@ -103,7 +103,8 @@ Process running on host in background.
 - other requests use `UUID`, they require `UUID_mutex` to be unlocked
 - `stop` request should acquire `UUID_mutex`
     - waits until process is stopped or until hardcoded timeout
-    - removes `UUID` from map
+    - `UUID` is marked as stopped, but user can still get an output or status
+        - limitation: all data is held in memory
 
 ## Library
 Provides connection to _Worker_ using unix socket.\
