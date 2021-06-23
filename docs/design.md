@@ -10,7 +10,6 @@ It provides abilities to:
 * start a process
     * TBD: to what extent should it be flexible?
         * executable name
-        * executable path
         * environment variables
         * arguments
 * stop a process
@@ -49,7 +48,7 @@ It acts as a server to clients implemented using _Library_.
 ### GRPC API
 _Library_ exposed using GRPC.
 #### Protobuf
-- TODO
+[../proto/process_manager.proto](../proto/process_manager.proto)
 #### Security
 - mtls
     - cipher suites:
@@ -107,13 +106,13 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 ## Worker
 Process running on host in background.
 ### Communication
-- unix socket for CLI
+- unix socket
 ### Architecture
 - listen for connections on a socket, handle them asynchronously
 - process instance is represented as UUID in a map held by worker
-- `start` request creates `UUID`
-- other requests use `UUID`, they require `UUID_mutex` to be unlocked
-- `stop` request should acquire `UUID_mutex`
+- `start` request, if succeeded, creates `UUID`
+- other requests use `UUID` as key, they require `UUID_mutex` to be unlocked
+- `stop` request acquires `UUID_mutex`
     - waits until process is stopped or until hardcoded timeout
     - `UUID` is marked as stopped, but user can still get an output or status
         - limitation: all data is held in memory

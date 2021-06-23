@@ -1,0 +1,49 @@
+syntax = "proto3";
+option go_package = "github.com/mjgrzybek/process_manager/proto";
+
+message StartRequest {
+  string name = 1;
+  repeated string args = 2;
+  repeated string env = 3;
+}
+
+message StartResponse {
+  oneof result {
+    string uuid = 1;
+    string errorMessage = 2;
+  }
+}
+
+message StopRequest {
+  string uuid = 1;
+}
+
+message StopResponse {
+  oneof result {
+    int32 exitCode = 1;
+    string errorMessage = 2;
+  }
+}
+
+message OutputRequest {
+  string uuid = 1;
+}
+
+message OutputResponse {
+  oneof result {
+    bytes output = 1;
+    string errorMessage = 2;
+  }
+}
+
+message OutputStreamRequest {
+  string uuid = 1;
+}
+
+
+service ProcessManagerService {
+  rpc Start (StartRequest) returns (StartResponse) {}
+  rpc Stop (StopRequest) returns (StopResponse) {}
+  rpc Output (OutputRequest) returns (OutputResponse) {}
+  rpc OutputStream (OutputStreamRequest) returns (stream OutputResponse) {}
+}
