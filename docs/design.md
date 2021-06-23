@@ -8,16 +8,19 @@ Clients (_Library_, _GRPC_, _CLI_) use UUID instead of PID to avoid collisions.
 
 It provides abilities to:
 * start a process
-    * TODO: to what extent should it be flexible?
+    * TBD: to what extent should it be flexible?
         * executable name
         * executable path
         * environment variables
         * arguments
 * stop a process
+    * TBD: hardcoded timout?
 * query status of a process
+    * TBD: what exactly do we mean by "status"?
+    * `/proc/PID/status` - seems enough for demo purposes, [linux manual page](https://man7.org/linux/man-pages/man5/proc.5.html)
 * handle process output
-    * get output atomically
-    * stream output
+    * get output from start until _now_
+    * stream output from _now_
 
 Processes are run as user who's running the _Service_.\
 Processes output is stored in memory which imposes output size restrictions.\
@@ -49,13 +52,23 @@ _Library_ exposed using GRPC.
 - TODO
 #### Security
 - mtls
-    - tls1.3
-    - safe and recommended cipher suites
-    ```
-    TLS_AES_256_GCM_SHA384
-    TLS_CHACHA20_POLY1305_SHA256
-    TLS_AES_128_GCM_SHA256
-    ```
+    - cipher suites:
+        - TLS1.3
+            - just default stuff:
+            ````
+            TLS_AES_256_GCM_SHA384
+            TLS_CHACHA20_POLY1305_SHA256
+            TLS_AES_128_GCM_SHA256
+            ````
+        - TLS1.2
+            - ECDHE only:
+            ```
+            ECDHE-ECDSA-AES256-GCM-SHA384
+            ECDHE-RSA-AES256-GCM-SHA384
+            ECDHE-ECDSA-CHACHA20-POLY1305
+            ECDHE-RSA-CHACHA20-POLY1305
+            ECDHE-ECDSA-AES256-SHA384
+            ```
 - simple auth scheme
     - basic auth with hardcoded user/password for demo purposes
     - no RBAC 
