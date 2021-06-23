@@ -93,10 +93,15 @@ Authentication is not needed - user is already authenticated to OS it's logged i
 | User requests process to be started; but it won't start | process isn't started; OS response is returned |
 | User requests process to be started; but it won't start | process isn't started; OS response is returned |
 | User requests process to be stopped | process is stopped; exit code is returned |
-| User requests process to be stopped; but it won't stop | process is not stopped; process status is returned |
-| User requests process status | process is stopped; exit code is returned |
+| User requests process to be stopped; but it won't stop | process is not stopped; user is notified about stoping failure |
+| User requests process status | status is returned |
+| User requests process status; process is stopped | status is returned |
 | User requests process output | output is returned |
+| User requests process output; process is stopped | cached output is returned |
 | User provides wrong credentials | HTTP 403 |
+| Worker runs out of memory due to excessive processes logging | worker dies, unsupported scenario |
+| Multiple processes sharing PID (at different time) | PID mapped on UUID, it's ok |
+
 
 # Technical design
 ## Worker
