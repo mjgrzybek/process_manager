@@ -31,8 +31,8 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 ## Use cases (CLI)
 | case | CLI args | result |
 | --- | --- | --- |
-| do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
-| do XXX request on remote machine with invalid client certificate | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --address=<remote_host_addr:port> XXX` | grpc error `UNAUTHENTICATED` |
+| do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
+| do XXX request on remote machine with invalid client certificate | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | grpc error `UNAUTHENTICATED` |
 | start `ping 1.1.1.1` process | (line above +) `--name=ping --args="1.1.1.1"` | `JobUUID` printed to `stdout` |
 | stop Job number 1234 | `stop --jobuuid=1234` | result returned (exit code or grpc error code) |
 | output of Job number 1234 | `output --jobuuid=1234` | Job's output printed from the beginning until now and then following, `tail -f -n +1` equivalent |
@@ -121,4 +121,5 @@ Commands cover all functionalities exposed by _GRPC Server_.
 Commandline options:
 - `cacertpath` - CA cert path
 - `clientkeypath` - client key path
+- `clientcertpath` - client cert path
 - `address` - GRPC Server address, `localhost:8080` by default
