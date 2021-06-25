@@ -15,7 +15,7 @@ It provides abilities to:
 * query status of a process
     * subset of `/proc/PID/status` - seems enough for demo purposes, see [protobuf](../proto/process_manager.proto)
 * handle process output
-    * stream buffered output from _start_ until _now_ and then 'live' until process exit or user's interruption 
+    * stream buffered output from _start_ until _now_ and then following until process exit or user's interruption 
 
 Processes are run as OS user who's running the _Worker_.\
 Processes output is stored in memory which imposes output size restrictions.\
@@ -26,7 +26,18 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 
 ![](drawings/stop.png)
 
-![](drawings/stream.png)
+![](drawings/output.png)
+
+## Use cases (CLI)
+| case | CLI args | result |
+| --- | --- | --- |
+| do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
+| start `ping 1.1.1.1` process | (line above +) `--name=ping --args="1.1.1.1"` | JobUUID printed to `stdout` |
+| stop Job number 1234 | `stop --jobuuid=1234` | result returned (exit code or grpc error code) |
+| output of Job number 1234 | `output --jobuuid=1234` | Job's output printed from the beginning until now and then following, `tail -f -n +1` equivalent |
+| break output stream of Job number 1234 | `ctrl-c` | client ends connection with server and exits gracefully |
+| status of Job number 1234 | `status --jobuuid=1234` | status printed |
+| stop not-owned job | `stop --jobuuid=111` | grpc error `PERMISSION_DENIED` returned |
 
 # Technical design
 ## Components diagram
@@ -107,6 +118,6 @@ Commands cover all functionalities exposed by _GRPC Server_.
 
 ### Configuration
 Commandline options:
-- `cacert` - CA cert path
+- `cacertpath` - CA cert path
 - `clientkeypath` - client key path
 - `address` - GRPC Server address, `localhost:8080` by default

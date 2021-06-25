@@ -8,10 +8,7 @@ message StartRequest {
 }
 
 message StartResponse {
-  oneof result {
-    string uuid = 1;
-    string errorMessage = 2;
-  }
+  string uuid = 1;
 }
 
 message StopRequest {
@@ -19,10 +16,7 @@ message StopRequest {
 }
 
 message StopResponse {
-  oneof result {
-    int32 exitCode = 1;
-    string errorMessage = 2;
-  }
+  int32 exitCode = 1;
 }
 
 message StatusRequest {
@@ -45,10 +39,7 @@ message Status {
 }
 
 message StatusResponse {
-  oneof result {
-    Status status = 1;
-    string errorMessage = 2;
-  }
+  Status status = 1;
 }
 
 message OutputRequest {
@@ -56,14 +47,7 @@ message OutputRequest {
 }
 
 message OutputResponse {
-  oneof result {
-    bytes output = 1;
-    string errorMessage = 2;
-  }
-}
-
-message OutputStreamRequest {
-  string uuid = 1;
+  bytes output = 1;
 }
 
 
@@ -71,6 +55,5 @@ service ProcessManagerService {
   rpc Start (StartRequest) returns (StartResponse) {}
   rpc Stop (StopRequest) returns (StopResponse) {}
   rpc Status (StatusRequest) returns (StatusResponse) {}
-  rpc Output (OutputRequest) returns (OutputResponse) {}
-  rpc OutputStream (OutputStreamRequest) returns (stream OutputResponse) {}
+  rpc OutputStream (OutputRequest) returns (stream OutputResponse) {}
 }
