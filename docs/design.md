@@ -33,7 +33,7 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 | --- | --- | --- |
 | do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
 | do XXX request on remote machine with invalid client certificate | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | grpc error `UNAUTHENTICATED` |
-| start `ping 1.1.1.1` process | (line above +) `--name=ping --args="1.1.1.1"` | `JobUUID` printed to `stdout` |
+| start `ping 1.1.1.1 -i4` process | (line above +) `--name=ping --arg="1.1.1.1" --arg="i4"` | `JobUUID` printed to `stdout` |
 | stop Job number 1234 | `stop --jobuuid=1234` | result returned (exit code or grpc error code) |
 | output of Job number 1234 | `output --jobuuid=1234` | Job's output printed from the beginning until now and then following, `tail -f -n +1` equivalent |
 | break output stream of Job number 1234 | `ctrl-c` | client ends connection with server and exits gracefully |
