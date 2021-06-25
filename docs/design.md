@@ -17,7 +17,7 @@ It provides abilities to:
 * handle process output
     * stream buffered output from _start_ until _now_ and then following until process exit or user's interruption 
 
-Processes are run as OS user who's running the _Worker_.\
+Processes are run as OS user who's running the _Service_.\
 Processes output is stored in memory which imposes output size restrictions.\
 Processes output is handled as bytes. Caller should convert it to expected encoding.
 
@@ -45,12 +45,12 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 
 ![Components](drawings/components.png)
 
-### Library
+### WorkerLib
 The `process_manager`'s internals implementation. \
 It talks to the OS to manage processes.\
 API input is `PID` (not `JobUUID`).
 
-### Worker
+### Service
 Background process with GRPC server running.
 
 State:
@@ -61,7 +61,7 @@ State:
 - `$ADMIN_CERTS_PATHS`environment variable - paths (splited with `;`) to clients certificates who have elevated rights
 #### Architecture
 - GRPC Server listens on hardcoded port (8080)
-- managed process instance is represented as `JobUUID` in a map held by worker
+- managed process instance is represented as `JobUUID` in a map held by service
 - `start` request, if succeeded, creates `JobUUID`
   - writes to map are synchronized
 - other requests use `JobUUID` as key, no data races should occur if multiple requests are handled in parallel
@@ -71,9 +71,9 @@ State:
     - limitation: all data is held in memory
 
 ### GRPC Server
-_Library_ exposed using GRPC.\
-`start` request is passed to _Library_, which returns `PID`; `PID` is mapped on `JobUUID`; `JobUUID` is returned as response.\
-Each other request is passed to _Library_ with `JobUUID` translated to `PID`. 
+_WorkerLib_ exposed using GRPC.\
+`start` request is passed to _WorkerLib_, which returns `PID`; `PID` is mapped on `JobUUID`; `JobUUID` is returned as response.\
+Each other request is passed to _WorkerLib_ with `JobUUID` translated to `PID`. 
 #### Protobuf
 [../proto/process_manager.proto](../proto/process_manager.proto)
 ### Authentication
@@ -106,9 +106,9 @@ mTLS Authentication
 User is an owner of `JobUUID`.\
 User's resources are isolated so that _userA_ cannot see or alter _userB_ processes.
 
-User can have acceess all proceses (`admin` mode) - see _Worker_ configuration
+User can have acceess all proceses (`admin` mode) - see _Service_ configuration
 ### CLI
-_Library_ exposed to command line users.\
+_WorkerLib_ exposed to command line users.\
 GRPC Client under the hood.
 
 All CLI's output is printed to `stdout`, including requested process's log stream.\
