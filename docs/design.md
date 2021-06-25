@@ -4,24 +4,20 @@ Design doc
 # Functional requirements
 `process_manager` is a tool that manages processes on Linux.\
 In order to provide full functionality, managed processes must be started using this tool.\
-Clients (_Library_, _GRPC_, _CLI_) use UUID instead of PID to avoid collisions.
+Clients (_GRPC_, _CLI_) use JobUUID instead of PID to avoid collisions.
 
 It provides abilities to:
 * start a process
-    * TBD: to what extent should it be flexible?
-        * executable name
-        * environment variables
-        * arguments
 * stop a process
-    * TBD: hardcoded timout?
+    1. _Worker_ sends `SIGTERM` signal to the process
+    2. _Worker_ waits for process to exit for hardcoded 3s
+    3. _Worker_ returns process `exit code`
 * query status of a process
-    * TBD: what exactly do we mean by "status"?
-    * `/proc/PID/status` - seems enough for demo purposes, [linux manual page](https://man7.org/linux/man-pages/man5/proc.5.html)
+    * subset of `/proc/PID/status` - seems enough for demo purposes, see [protobuf](../proto/process_manager.proto)
 * handle process output
-    * get output from start until _now_
-    * stream output from _now_
+    * stream buffered output from _start_ until _now_ and then 'live' until process exit or user's interruption 
 
-Processes are run as user who's running the _Worker_.\
+Processes are run as OS user who's running the _Worker_.\
 Processes output is stored in memory which imposes output size restrictions.\
 Processes output is handled as bytes. Caller should convert it to expected encoding.
 
@@ -30,26 +26,45 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 
 ![](drawings/stop.png)
 
-![](drawings/output.png)
-
 ![](drawings/stream.png)
 
-## Components
+# Technical design
+## Components diagram
 
 ![Components](drawings/components.png)
-### Worker 
-Thats's the `process_manager`'s engine. Functionalities' logic is implemented here.\
-It talks to the OS and maps PIDs to UUIDs.\
-It acts as a server to clients implemented using _Library_.
 
 ### Library
-`process_manger`'s client API in Go.
+The `process_manager`'s internals implementation. \
+It talks to the OS to manage processes state.\
+API input is PID (not JobUUID).
 
-### GRPC API
-_Library_ exposed using GRPC.
+### Worker
+Background process with GRPC server running.
+
+State:
+- `JobUUID`:`PID` mapping
+- output (`stdout`+`stderr` combined) cache
+
+#### Configuration
+- `$ADMIN_CERTS_PATHS`environment variable - paths (splited with `;`) to clients certificates who have elevated rights
+#### Architecture
+- GRPC Server listens on hardcoded port (8080)
+- managed process instance is represented as JobUUID in a map held by worker
+- `start` request, if succeeded, creates `JobUUID`
+  - writes to map are synchronized
+- other requests use `JobUUID` as key, no data races should occur if multiple requests are handled in parallel
+- `stop` request acquires `JobUUID_mutex`
+  - waits until process is stopped or until hardcoded timeout
+  - `JobUUID` is marked as stopped, but user can still get an output or status
+    - limitation: all data is held in memory
+
+### GRPC Server
+_Library_ exposed using GRPC.\
+`start` request is passed to _Library_, which returns `PID`; `PID` is mapped on `JobUUID`; `JobUUID` is returned as response.\
+Each other request is passed to _Library_ with `JobUUID` translated to `PID`. 
 #### Protobuf
 [../proto/process_manager.proto](../proto/process_manager.proto)
-#### Authentication
+### Authentication
 mTLS Authentication
 - cipher suites:
     - src: https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
@@ -75,67 +90,23 @@ mTLS Authentication
     TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
     TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
     ```
-#### Authorization
-Simple RBAC system.\
-Predefined roles.
+### Authorization
+User is an owner of `JobUUID`.\
+User's resources are isolated so that _userA_ cannot see or alter _userB_ processes.
 
-| ROLE  |  start  | stop  | status  | output  | stream |
-|---|---|---|---|---|---|
-| admin  | x  | x  | x  | x   | x  |
-| user  |   |   | x  | x  |  |
-| streamer  |   |  | x |   | x |
-
-Roles are preassigned to client's certificates for demo purposes.
+User can have acceess all proceses (`admin` mode) - see _Worker_ configuration
 ### CLI
 _Library_ exposed to command line users.\
+GRPC Client under the hood.
+
 All CLI's output is printed to `stdout`, including requested process's log stream.\
 User can stop stream using `SIGINT` (ctrl+c) signal.
-#### Authentication
-Authentication is not needed - user is already authenticated to OS it's logged in.
-#### Authorization
-User is considered an `admin`.
-# Use cases
-| case | expected result |
-| --- | --- |
-| User requests process to be started | process is started; process UUID is returned |
-| User requests process to be started; but it won't start | process isn't started; OS response is returned |
-| User requests process to be started; but it won't start | process isn't started; OS response is returned |
-| User requests process to be stopped | process is stopped; exit code is returned |
-| User requests process to be stopped; but it won't stop | process is not stopped; user is notified about stoping failure |
-| User requests process status | status is returned |
-| User requests process status; process is stopped | status is returned |
-| User requests process output | output is returned |
-| User requests process output; process is stopped | cached output is returned |
-| User provides wrong credentials | HTTP 403 |
-| Worker runs out of memory due to excessive processes logging | worker dies, unsupported scenario |
-| Multiple processes sharing PID (at different time) | PID mapped on UUID, it's ok |
-| Double `stop` request | Second request is rejected |
-| Double `output` request | It's ok, output is returned twice |
 
-
-# Technical design
-## Worker
-Process running on host in background.
-### Communication
-- unix socket
-### Architecture
-- listen for connections on a socket, handle them asynchronously
-- process instance is represented as UUID in a map held by worker
-- `start` request, if succeeded, creates `UUID`
-  - writes to map are synchronized
-- other requests use `UUID` as key, no data races should occur if multiple requests are handled in parallel
-- `stop` request acquires `UUID_mutex`
-    - waits until process is stopped or until hardcoded timeout
-    - `UUID` is marked as stopped, but user can still get an output or status
-        - limitation: all data is held in memory
-
-## Library
-Provides connection to _Worker_ using unix socket.\
-Proxy to _Worker_'s functionalities that should be client facing.
-## GRPC Server
-Exposes GRPC API on hardcoded port (8080).
-Uses _Library_ to connect to the _Worker_.
-## CLI
 CLI is generated with `"github.com/spf13/cobra"`\
-Commands cover all _Library_ functions.\
-_Library_ is used to connect to the _Worker_.
+Commands cover all functionalities exposed by _GRPC Server_.
+
+### Configuration
+Commandline options:
+- `cacert` - CA cert path
+- `clientkeypath` - client key path
+- `address` - GRPC Server address, `localhost:8080` by default

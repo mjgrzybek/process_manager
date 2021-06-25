@@ -30,41 +30,18 @@ message StatusRequest {
 }
 
 message Status {
-  string Name = 1;
-  string Umask = 2;
-  string State = 3;
-  int32 Tgid = 4;
-  int32 Ngid = 5;
-  int32 Pid = 6;
-  int32 PPid = 7;
-  int32 TracerPid = 8;
-  int32 Uid = 9;
-  int32 Gid = 10;
-  int32 FDSize = 11;
-  repeated int32 Groups = 12;
-  int32 NStgid = 13;
-  int32 NSpid = 14;
-  int32 NSpgid = 15;
-  int32 NSsid = 16;
-  int64 VmPeak = 17;
-  int64 VmSize = 18;
-  int64 VmLck = 19;
-  int64 VmPin = 20;
-  int64 VmHWM = 21;
-  int64 VmRSS = 22;
-  int64 RssAnon = 23;
-  int64 RssFile = 24;
-  int64 RssShmem = 25;
-  int64 VmData = 26;
-  int64 VmStk = 27;
-  int64 VmExe = 28;
-  int64 VmLib = 29;
-  int64 VmPTE = 30;
-  int64 VmPMD = 31;
-  int64 VmSwap = 32;
-  int32 HugetlbPages = 33;
-  bool CoreDumping = 34;
-  int32 Threads = 35;
+  int32 processId = 1;
+  string effectiveUserName = 2;
+  int32 priority = 3;
+  int32 niceValue = 4;
+  string virtualImage = 5;
+  int32 residentSize = 6;
+  int32 sharedMemory = 7;
+  string processStatus = 7;
+  int32 cpuUsage = 8;
+  int32 memoryUsage = 9;
+  int32 cpuTime = 10;
+  string commandLine = 11;
 }
 
 message StatusResponse {
