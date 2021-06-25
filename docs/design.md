@@ -4,7 +4,7 @@ Design doc
 # Functional requirements
 `process_manager` is a tool that manages processes on Linux.\
 In order to provide full functionality, managed processes must be started using this tool.\
-Clients (_GRPC_, _CLI_) use JobUUID instead of PID to avoid collisions.
+Clients (_GRPC_, _CLI_) use `JobUUID` instead of `PID` to avoid collisions.
 
 It provides abilities to:
 * start a process
@@ -32,7 +32,7 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 | case | CLI args | result |
 | --- | --- | --- |
 | do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
-| start `ping 1.1.1.1` process | (line above +) `--name=ping --args="1.1.1.1"` | JobUUID printed to `stdout` |
+| start `ping 1.1.1.1` process | (line above +) `--name=ping --args="1.1.1.1"` | `JobUUID` printed to `stdout` |
 | stop Job number 1234 | `stop --jobuuid=1234` | result returned (exit code or grpc error code) |
 | output of Job number 1234 | `output --jobuuid=1234` | Job's output printed from the beginning until now and then following, `tail -f -n +1` equivalent |
 | break output stream of Job number 1234 | `ctrl-c` | client ends connection with server and exits gracefully |
@@ -46,8 +46,8 @@ Processes output is handled as bytes. Caller should convert it to expected encod
 
 ### Library
 The `process_manager`'s internals implementation. \
-It talks to the OS to manage processes state.\
-API input is PID (not JobUUID).
+It talks to the OS to manage processes.\
+API input is `PID` (not `JobUUID`).
 
 ### Worker
 Background process with GRPC server running.
@@ -60,7 +60,7 @@ State:
 - `$ADMIN_CERTS_PATHS`environment variable - paths (splited with `;`) to clients certificates who have elevated rights
 #### Architecture
 - GRPC Server listens on hardcoded port (8080)
-- managed process instance is represented as JobUUID in a map held by worker
+- managed process instance is represented as `JobUUID` in a map held by worker
 - `start` request, if succeeded, creates `JobUUID`
   - writes to map are synchronized
 - other requests use `JobUUID` as key, no data races should occur if multiple requests are handled in parallel
