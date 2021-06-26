@@ -7,22 +7,22 @@ import (
 	"time"
 )
 
-func Stop(job *job) {
+func (j *job) Stop() {
 	processState := make(chan *os.ProcessState)
-	go processWait(job.Process, processState)
+	go processWait(j.Process, processState)
 
-	_ = job.Process.Signal(syscall.SIGTERM)
+	_ = j.Process.Signal(syscall.SIGTERM)
 
 	select {
-	case job.ProcessState = <-processState:
+	case j.ProcessState = <-processState:
 	case <-time.After(3 * time.Second):
-		_ = job.Process.Signal(syscall.SIGKILL)
 		// no one can resist SIGKILL
-		job.ProcessState = <-processState
+		_ = j.Process.Signal(syscall.SIGKILL)
+		j.ProcessState = <-processState
 	}
 
-	job.exitedDate = time.Now()
-	job.state = Stopped
+	j.exitedDate = time.Now()
+	j.state = Stopped
 }
 
 func processWait(process *os.Process, state chan *os.ProcessState) {

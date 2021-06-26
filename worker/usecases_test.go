@@ -79,7 +79,7 @@ func TestUseCases(t *testing.T) {
 				}
 			}()
 
-			Stop(job)
+			job.Stop()
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("exitcode error = %v, wantErr %v", err, tt.wantErr)
