@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 option go_package = "github.com/mjgrzybek/process_manager/proto";
 
 message StartRequest {
@@ -24,18 +25,27 @@ message StatusRequest {
 }
 
 message Status {
-  int32 processId = 1;
-  string effectiveUserName = 2;
-  int32 priority = 3;
-  int32 niceValue = 4;
-  string virtualImage = 5;
-  int32 residentSize = 6;
-  int32 sharedMemory = 7;
-  string processStatus = 7;
-  int32 cpuUsage = 8;
-  int32 memoryUsage = 9;
-  int32 cpuTime = 10;
-  string commandLine = 11;
+  enum State {
+    SCHEDULED = 0;
+    RUNNING = 1;
+    STOPPED = 2;
+  }
+  State state = 1;
+
+  message StartedProcess {
+    google.protobuf.Timestamp startedDate = 1;
+  }
+  message ExitedProcess {
+    google.protobuf.Timestamp startedDate = 1;
+    google.protobuf.Timestamp exitedDate = 2;
+    int32 exitcode = 3;
+    string systemStatus = 4;
+  }
+
+  oneof details { // aka. optional
+    StartedProcess startedProcess = 2;
+    ExitedProcess exitedProcess = 3;
+  }
 }
 
 message StatusResponse {
