@@ -21,7 +21,8 @@ func Stop(job *job) {
 		job.ProcessState = <-processState
 	}
 
-	job.JobState = Stopped
+	job.exitedDate = time.Now()
+	job.state = Stopped
 }
 
 func processWait(process *os.Process, state chan *os.ProcessState) {

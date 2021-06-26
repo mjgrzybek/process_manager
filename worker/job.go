@@ -22,13 +22,12 @@ func (js JobState) String() string {
 	return [...]string{"Scheduled", "Running", "Stopped"}[js]
 }
 
-type jobStatus struct {
-	JobState
-}
-
 type job struct {
 	*exec.Cmd
-	jobStatus
+	state JobState
+
+	startedDate time.Time
+	exitedDate time.Time
 
 	// TBD: output synchronization needed not to mess stdout and stdin between flushes?
 	outputFile     *os.File
@@ -65,9 +64,8 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 
 	job := &job{
 		Cmd: command,
-		jobStatus: jobStatus{
-			JobState: Scheduled,
-		},
+		state: Scheduled,
+		startedDate: time.Now(),
 		outputFile: outputFile,
 	}
 
@@ -80,7 +78,7 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 	if err != nil {
 		return nil, err
 	}
-	job.JobState = Running
+	job.state = Running
 
 	return job, nil
 }
@@ -103,3 +101,6 @@ func (j *job) Tail() (*tail.Tail, error) {
 
 	return t, nil
 }
+
+
+
