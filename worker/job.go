@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
+
+	"github.com/hpcloud/tail"
 )
 
 type JobState int
@@ -27,7 +30,16 @@ type job struct {
 	jobStatus
 
 	// TBD: output synchronization needed not to mess stdout and stdin between flushes?
-	combinedOutputFile *os.File
+	outputFile     *os.File
+	outputFilePath string
+}
+
+func (j *job) Close() error {
+	err := j.outputFile.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewJob(command *exec.Cmd) (*job, error) {
@@ -50,6 +62,26 @@ func NewJob(command *exec.Cmd) (*job, error) {
 		jobStatus: jobStatus{
 			JobState: Scheduled,
 		},
-		combinedOutputFile: outputFile,
+		outputFilePath: outputFile.Name(),
+		outputFile: outputFile,
 	}, nil
+}
+
+
+func (j *job) OutputReader() (*tail.Tail, error) {
+	t, err := tail.TailFile(j.outputFilePath, tail.Config{Follow: true})
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		for {
+			if j.ProcessState != nil { // process is still running
+				t.Stop()
+			}
+			time.Sleep(200 * time.Millisecond)
+		}
+	}()
+
+	return t, nil
 }

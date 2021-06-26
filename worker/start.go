@@ -19,7 +19,7 @@ func StartJob(name string, argv []string, env []string) (*job, error) {
 	}
 
 	command.Env = env
-	writer := bufio.NewWriter(job.combinedOutputFile)
+	writer := bufio.NewWriter(job.outputFile)
 	command.Stderr = writer
 	command.Stdout = writer
 

@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -63,20 +64,28 @@ func TestUseCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			job := tt.args.job
 
+			go func() {
+				tail, err := job.OutputReader()
+				if err != nil {
+					t.Error(err)
+				}
+				for line := range tail.Lines {
+					fmt.Println(line.Text)
+				}
+			}()
+
+			time.Sleep(2 * time.Second)
+
 			Stop(job)
 			exitcode := job.ProcessState.ExitCode()
 
-			//r := job.OutputStream()
-			//for {
-			//
-			//}
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Status() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("exitcode error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if exitcode != tt.want {
-				t.Errorf("Status() got = %v, want %v", exitcode, tt.want)
+				t.Errorf("exitcode got = %v, want %v", exitcode, tt.want)
 			}
 		})
 	}

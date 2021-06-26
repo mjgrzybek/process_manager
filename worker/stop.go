@@ -17,6 +17,7 @@ func Stop(job *job) {
 	case job.ProcessState = <-processState:
 	case <-time.After(3 * time.Second):
 		_ = job.Process.Signal(syscall.SIGKILL)
+		// no one can resist SIGKILL
 		job.ProcessState = <-processState
 	}
 
