@@ -17,24 +17,20 @@ message StopRequest {
 }
 
 message StopResponse {
-  int32 exitCode = 1;
 }
 
 message StatusRequest {
   string uuid = 1;
 }
 
-message Status {
-  enum State {
-    SCHEDULED = 0;
-    RUNNING = 1;
-    STOPPED = 2;
+message StatusResponse {
+  message ScheduledProcess {
   }
-  State state = 1;
 
   message StartedProcess {
     google.protobuf.Timestamp startedDate = 1;
   }
+
   message ExitedProcess {
     google.protobuf.Timestamp startedDate = 1;
     google.protobuf.Timestamp exitedDate = 2;
@@ -42,14 +38,11 @@ message Status {
     string systemStatus = 4;
   }
 
-  oneof details { // aka. optional
+  oneof state {
+    ScheduledProcess scheduledProcess = 1;
     StartedProcess startedProcess = 2;
     ExitedProcess exitedProcess = 3;
   }
-}
-
-message StatusResponse {
-  Status status = 1;
 }
 
 message OutputRequest {
