@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-
 func TestUseCases(t *testing.T) {
 	lsJob, err := NewJob("ls", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 
 	pingJob, err := NewJob("ping", []string{"localhost"}, nil)
 	if err != nil {
@@ -25,7 +23,7 @@ func TestUseCases(t *testing.T) {
 	}
 
 	// give time processes to start
-	time.Sleep(1*time.Second)
+	time.Sleep(1 * time.Second)
 
 	type args struct {
 		job *job
@@ -34,7 +32,7 @@ func TestUseCases(t *testing.T) {
 		name     string
 		args     args
 		exitcode int
-		status string
+		status   string
 		wantErr  bool
 	}{
 		{
@@ -43,7 +41,7 @@ func TestUseCases(t *testing.T) {
 				job: lsJob,
 			},
 			exitcode: 0,
-			status: "exit status 0",
+			status:   "exit status 0",
 			wantErr:  false,
 		},
 		{
@@ -52,7 +50,7 @@ func TestUseCases(t *testing.T) {
 				job: pingJob,
 			},
 			exitcode: -1,
-			status: "signal: terminated",
+			status:   "signal: terminated",
 			wantErr:  false,
 		},
 		{
@@ -61,7 +59,7 @@ func TestUseCases(t *testing.T) {
 				job: sigtermIgnorerJob,
 			},
 			exitcode: -1,
-			status: "signal: killed",
+			status:   "signal: killed",
 			wantErr:  false,
 		},
 	}

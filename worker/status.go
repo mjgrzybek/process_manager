@@ -44,4 +44,3 @@ func (j *job) GetExitedDate() (time.Time, error) {
 	}
 	return j.exitedDate, nil
 }
-

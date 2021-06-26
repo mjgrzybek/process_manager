@@ -12,10 +12,11 @@ import (
 )
 
 type JobState int
+
 const (
 	Scheduled JobState = iota
-	Running = iota
-	Stopped = iota
+	Running            = iota
+	Stopped            = iota
 )
 
 func (js JobState) String() string {
@@ -27,10 +28,10 @@ type job struct {
 	state JobState
 
 	startedDate time.Time
-	exitedDate time.Time
+	exitedDate  time.Time
 
 	// TBD: output synchronization needed not to mess stdout and stdin between flushes?
-	outputFile     *os.File
+	outputFile *os.File
 }
 
 func (j *job) Close() error {
@@ -63,10 +64,10 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 	}
 
 	job := &job{
-		Cmd: command,
-		state: Scheduled,
+		Cmd:         command,
+		state:       Scheduled,
 		startedDate: time.Now(),
-		outputFile: outputFile,
+		outputFile:  outputFile,
 	}
 
 	command.Env = env
@@ -82,7 +83,6 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 
 	return job, nil
 }
-
 
 func (j *job) Tail() (*tail.Tail, error) {
 	t, err := tail.TailFile(j.outputFile.Name(), tail.Config{Follow: true})
@@ -101,6 +101,3 @@ func (j *job) Tail() (*tail.Tail, error) {
 
 	return t, nil
 }
-
-
-
