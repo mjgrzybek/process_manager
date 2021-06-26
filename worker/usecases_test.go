@@ -8,22 +8,23 @@ import (
 
 
 func TestUseCases(t *testing.T) {
-	lsJob, err := StartJob("ls", nil, nil)
+	lsJob, err := NewJob("ls", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 
-	pingJob, err := StartJob("ping", []string{"localhost"}, nil)
+	pingJob, err := NewJob("ping", []string{"localhost"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	sigtermIgnorerJob, err := StartJob("../tools/signal-ignorer/signal-ignorer.sh", []string{"SIGTERM"}, nil)
+	sigtermIgnorerJob, err := NewJob("../tools/signal-ignorer/signal-ignorer.sh", []string{"SIGTERM"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// give time processes to start
 	time.Sleep(1*time.Second)
 
 	type args struct {
@@ -68,7 +69,7 @@ func TestUseCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			job := tt.args.job
 
-			tail, err := job.OutputReader()
+			tail, err := job.Tail()
 			if err != nil {
 				t.Error(err)
 			}
@@ -93,4 +94,3 @@ func TestUseCases(t *testing.T) {
 		})
 	}
 }
-

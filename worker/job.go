@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"bufio"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -31,7 +32,6 @@ type job struct {
 
 	// TBD: output synchronization needed not to mess stdout and stdin between flushes?
 	outputFile     *os.File
-	outputFilePath string
 }
 
 func (j *job) Close() error {
@@ -42,7 +42,13 @@ func (j *job) Close() error {
 	return nil
 }
 
-func NewJob(command *exec.Cmd) (*job, error) {
+func NewJob(name string, argv []string, env []string) (*job, error) {
+	execpath, err := exec.LookPath(name)
+	if err != nil {
+		return nil, err
+	}
+	command := exec.Command(execpath, argv...)
+
 	logsStorageDir := path.Join(os.TempDir(), "process_runner")
 
 	if _, err := os.Stat(logsStorageDir); os.IsNotExist(err) {
@@ -57,19 +63,31 @@ func NewJob(command *exec.Cmd) (*job, error) {
 		return nil, err
 	}
 
-	return &job{
+	job := &job{
 		Cmd: command,
 		jobStatus: jobStatus{
 			JobState: Scheduled,
 		},
-		outputFilePath: outputFile.Name(),
 		outputFile: outputFile,
-	}, nil
+	}
+
+	command.Env = env
+	writer := bufio.NewWriter(outputFile)
+	command.Stderr = writer
+	command.Stdout = writer
+
+	err = command.Start()
+	if err != nil {
+		return nil, err
+	}
+	job.JobState = Running
+
+	return job, nil
 }
 
 
-func (j *job) OutputReader() (*tail.Tail, error) {
-	t, err := tail.TailFile(j.outputFilePath, tail.Config{Follow: true})
+func (j *job) Tail() (*tail.Tail, error) {
+	t, err := tail.TailFile(j.outputFile.Name(), tail.Config{Follow: true})
 	if err != nil {
 		return nil, err
 	}
