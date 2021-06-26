@@ -10,7 +10,7 @@ It provides abilities to:
 * start a process
 * stop a process
     1. _Worker_ sends `SIGTERM` signal to the process
-    2. _Worker_ waits for process to exit for hardcoded 3s
+    2. _Worker_ waits for process to exit for hardcoded 3s, else process is killed with `SIGKILL`
     3. _Worker_ returns process `exit code`
 * query status of a process
     * subset of `/proc/PID/status` - seems enough for demo purposes, see [protobuf](../proto/process_manager.proto)
@@ -66,8 +66,8 @@ State:
   - writes to map are synchronized
 - other requests use `JobUUID` as key, no data races should occur if multiple requests are handled in parallel
 - `stop` request acquires `JobUUID_mutex`
-  - waits until process is stopped or until hardcoded timeout
-  - `JobUUID` is marked as stopped, but user can still get an output or status
+  - waits until process is stopped
+  - `JobUUID` is stopped, but user can still get an output or status
     - limitation: all data is held in memory
 
 ### GRPC Server
