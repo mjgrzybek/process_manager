@@ -80,28 +80,12 @@ Each other request is passed to _WorkerLib_ with `JobUUID` translated to `PID`.
 mTLS Authentication
 - cipher suites:
     - src: https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
-    - TLS1.3 or TLS1.2 are the only valid choices
-    - cipher suite ordered by: security, compatibility, performance
-    ```
-    TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
-    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-    TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
-    TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
-    TLS_DHE_RSA_WITH_AES_128_CBC_SHA
-    TLS_DHE_RSA_WITH_AES_256_CBC_SHA
-    TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-    TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
-    ```
+    - TLS1.3, default configuration is safe and efficient:
+  ```golang
+  TLSConfig: &tls.Config{
+      MinVersion:   tls.VersionTLS13,
+  },
+  ```
 ### Authorization
 User is an owner of `JobUUID`.\
 User's resources are isolated so that _userA_ cannot see or alter _userB_ processes.
