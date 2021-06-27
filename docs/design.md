@@ -20,6 +20,8 @@ It provides abilities to:
 Processes are run as OS user who's running the _Service_.\
 Processes output is stored in memory which imposes output size restrictions.\
 Processes output is handled as bytes. Caller should convert it to expected encoding.
+`process_manager` doesn't control process resources.
+Processes can fork.
 
 ## Basic sequence diagrams
 ![](drawings/start.png) 
