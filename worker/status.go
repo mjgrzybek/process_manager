@@ -18,29 +18,41 @@ func (j *job) GetState() JobState {
 }
 
 func (j *job) GetExitCode() (int, error) {
+	j.RLock()
+	defer j.RUnlock()
+
 	if j.state != Stopped {
 		return -1, errors.New("Exitcode not available for running process")
 	}
+
 	return j.ProcessState.ExitCode(), nil
 }
 
 func (j *job) GetSystemStatus() (string, error) {
+	j.RLock()
+	defer j.RUnlock()
+
 	if j.state != Stopped {
 		return "", errors.New("SystemStatus not available for running process")
 	}
+
 	return j.ProcessState.String(), nil
 }
 
 func (j *job) GetStartedDate() (time.Time, error) {
-	if j.state == Scheduled {
-		return time.Time{}, errors.New("Process not started yet")
-	}
+	j.RLock()
+	defer j.RUnlock()
+
 	return j.startedDate, nil
 }
 
 func (j *job) GetExitedDate() (time.Time, error) {
+	j.RLock()
+	defer j.RUnlock()
+
 	if j.state != Stopped {
 		return time.Time{}, errors.New("Process is not stopped")
 	}
+
 	return j.exitedDate, nil
 }

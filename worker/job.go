@@ -6,17 +6,18 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sync"
 	"time"
 
 	"github.com/hpcloud/tail"
 )
 
 type JobState int
+type CommonName string
 
 const (
-	Scheduled JobState = iota
-	Running            = iota
-	Stopped            = iota
+	Running JobState = iota
+	Stopped          = iota
 )
 
 func (js JobState) String() string {
@@ -30,8 +31,11 @@ type job struct {
 	startedDate time.Time
 	exitedDate  time.Time
 
-	// TBD: output synchronization needed not to mess stdout and stdin between flushes?
 	outputFile *os.File
+
+	owner CommonName
+
+	sync.RWMutex
 }
 
 func (j *job) Close() error {
@@ -65,7 +69,7 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 
 	job := &job{
 		Cmd:         command,
-		state:       Scheduled,
+		state:       Running,
 		startedDate: time.Now(),
 		outputFile:  outputFile,
 	}
@@ -79,7 +83,6 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 	if err != nil {
 		return nil, err
 	}
-	job.state = Running
 
 	return job, nil
 }
@@ -92,9 +95,12 @@ func (j *job) Tail() (*tail.Tail, error) {
 
 	go func() {
 		for {
+			j.RLock()
 			if j.ProcessState != nil { // process is still running
 				t.Stop()
 			}
+			j.RUnlock()
+
 			time.Sleep(200 * time.Millisecond)
 		}
 	}()

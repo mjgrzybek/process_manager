@@ -13,6 +13,9 @@ func (j *job) Stop() {
 
 	_ = j.Process.Signal(syscall.SIGTERM)
 
+	j.Lock()
+	defer j.Unlock()
+
 	select {
 	case j.ProcessState = <-processState:
 	case <-time.After(3 * time.Second):
