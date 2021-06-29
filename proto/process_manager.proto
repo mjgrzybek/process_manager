@@ -1,0 +1,62 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/mjgrzybek/process_manager/proto";
+
+message StartRequest {
+  string name = 1;
+  repeated string args = 2;
+  repeated string env = 3;
+}
+
+message StartResponse {
+  string uuid = 1;
+}
+
+message StopRequest {
+  string uuid = 1;
+}
+
+message StopResponse {
+}
+
+message StatusRequest {
+  string uuid = 1;
+}
+
+message StatusResponse {
+  message ScheduledProcess {
+  }
+
+  message StartedProcess {
+    google.protobuf.Timestamp startedDate = 1;
+  }
+
+  message ExitedProcess {
+    google.protobuf.Timestamp startedDate = 1;
+    google.protobuf.Timestamp exitedDate = 2;
+    int32 exitcode = 3;
+    string systemStatus = 4;
+  }
+
+  oneof state {
+    ScheduledProcess scheduledProcess = 1;
+    StartedProcess startedProcess = 2;
+    ExitedProcess exitedProcess = 3;
+  }
+}
+
+message OutputRequest {
+  string uuid = 1;
+}
+
+message OutputResponse {
+  bytes output = 1;
+}
+
+
+service ProcessManagerService {
+  rpc Start (StartRequest) returns (StartResponse) {}
+  rpc Stop (StopRequest) returns (StopResponse) {}
+  rpc Status (StatusRequest) returns (StatusResponse) {}
+  rpc OutputStream (OutputRequest) returns (stream OutputResponse) {}
+}
