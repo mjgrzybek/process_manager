@@ -12,7 +12,7 @@ It provides abilities to:
     1. _Worker_ sends `SIGTERM` signal to the process
     2. _Worker_ waits for process to exit for hardcoded 3s, else process is killed with `SIGKILL`
 * query status of a process (see [protobuf](../proto/process_manager.proto))
-    * state (scheduled, running, stopped)
+    * state (running, stopped)
     * started date
     * stopped date
     * exit code
@@ -39,8 +39,8 @@ Path traversal is allowed.
 | --- | --- | --- |
 | do XXX request on remote machine | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | response printed to `stdout` |
 | do XXX request on remote machine with invalid client certificate | `--cacertpath=<ca.crt> --clientkeypath=<client.key> --clientcertpath=<client.crt> --address=<remote_host_addr:port> XXX` | grpc error `UNAUTHENTICATED` |
-| start `ping 1.1.1.1 -i4` process | (line above +) `--name=ping --arg="1.1.1.1" --arg="i4"` | `UUID` printed to `stdout` |
-| start `../traversal/aaa` process | `--name=../traversal/aaa` | `UUID` printed to `stdout` |
+| start `ping 1.1.1.1 -i4` process | (line above +) `start ping 1.1.1.1 i4` | `UUID` printed to `stdout` |
+| start `../traversal/aaa` process | `start ../traversal/aaa` | `UUID` printed to `stdout` |
 | stop Job number 1234 | `stop --UUID=1234` | result returned (exit code or grpc error code) |
 | output of Job number 1234 | `output --UUID=1234` | Job's output printed from the beginning until now and then following, `tail -f -n +1` equivalent |
 | break output stream of Job number 1234 | `ctrl-c` | client ends connection with server and exits gracefully |
@@ -60,9 +60,8 @@ API works on `Job` objects.
 
 ```golang
 const (
-	Scheduled JobState = iota
-	Running            = iota
-	Stopped            = iota
+	Running JobState = iota
+	Stopped          = iota
 )
 
 type job struct {
@@ -123,6 +122,9 @@ mTLS Authentication
   },
   ```
 ### Authorization
+Users are distinguished by `CommonName` field in public certificate.\ 
+PKI guarantees no two distinct users get the same `CN`.
+
 User is an owner of `UUID`.\
 User's resources are isolated so that _userA_ cannot see or alter _userB_ processes.
 
