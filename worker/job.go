@@ -21,7 +21,7 @@ const (
 )
 
 func (js JobState) String() string {
-	return [...]string{"Scheduled", "Running", "Stopped"}[js]
+	return [...]string{"Running", "Stopped"}[js]
 }
 
 type job struct {
