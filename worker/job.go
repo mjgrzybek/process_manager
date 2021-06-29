@@ -33,8 +33,6 @@ type job struct {
 
 	outputFile *os.File
 
-	owner CommonName
-
 	sync.RWMutex
 }
 
@@ -97,7 +95,7 @@ func (j *job) Tail() (*tail.Tail, error) {
 		for {
 			j.RLock()
 			if j.ProcessState != nil { // process is still running
-				t.Stop()
+				_ = t.Stop()
 			}
 			j.RUnlock()
 
