@@ -24,7 +24,7 @@ func (js JobState) String() string {
 	return [...]string{"Running", "Stopped"}[js]
 }
 
-type job struct {
+type Job struct {
 	*exec.Cmd
 	state JobState
 
@@ -36,7 +36,7 @@ type job struct {
 	sync.RWMutex
 }
 
-func (j *job) Close() error {
+func (j *Job) Close() error {
 	err := j.outputFile.Close()
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (j *job) Close() error {
 	return nil
 }
 
-func NewJob(name string, argv []string, env []string) (*job, error) {
+func NewJob(name string, argv []string, env []string) (*Job, error) {
 	execpath, err := exec.LookPath(name)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 		return nil, err
 	}
 
-	job := &job{
+	job := &Job{
 		Cmd:         command,
 		state:       Running,
 		startedDate: time.Now(),
@@ -85,7 +85,7 @@ func NewJob(name string, argv []string, env []string) (*job, error) {
 	return job, nil
 }
 
-func (j *job) Tail() (*tail.Tail, error) {
+func (j *Job) Tail() (*tail.Tail, error) {
 	t, err := tail.TailFile(j.outputFile.Name(), tail.Config{Follow: true})
 	if err != nil {
 		return nil, err

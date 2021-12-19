@@ -45,6 +45,18 @@ message StatusResponse {
   }
 }
 
+message JobsRequest {
+}
+
+message JobsResponse {
+  message Job {
+    string uuid = 1;
+    StatusResponse status = 2;
+  }
+
+  repeated Job jobs = 1;
+}
+
 message OutputRequest {
   string uuid = 1;
 }
@@ -58,5 +70,6 @@ service ProcessManagerService {
   rpc Start (StartRequest) returns (StartResponse) {}
   rpc Stop (StopRequest) returns (StopResponse) {}
   rpc Status (StatusRequest) returns (StatusResponse) {}
+  rpc Jobs (JobsRequest) returns (JobsResponse) {}
   rpc OutputStream (OutputRequest) returns (stream OutputResponse) {}
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (j *job) Stop() {
+func (j *Job) Stop() {
 	processState := make(chan *os.ProcessState)
 	go processWait(j.Process, processState)
 
@@ -32,7 +32,7 @@ func processWait(process *os.Process, state chan *os.ProcessState) {
 	ps, err := process.Wait()
 	// TODO: handle error
 	if err != nil {
-		log.Printf("ProcessWait: %e", err)
+		log.Printf("ProcessWait: %v", err)
 	}
 	state <- ps
 }

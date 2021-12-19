@@ -26,7 +26,7 @@ func TestUseCases(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	type args struct {
-		job *job
+		job *Job
 	}
 	tests := []struct {
 		name     string

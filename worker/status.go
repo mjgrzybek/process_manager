@@ -13,11 +13,11 @@ type Status interface {
 	GetExitedDate() (time.Time, error)
 }
 
-func (j *job) GetState() JobState {
+func (j *Job) GetState() JobState {
 	return j.state
 }
 
-func (j *job) GetExitCode() (int, error) {
+func (j *Job) GetExitCode() (int, error) {
 	j.RLock()
 	defer j.RUnlock()
 
@@ -28,7 +28,7 @@ func (j *job) GetExitCode() (int, error) {
 	return j.ProcessState.ExitCode(), nil
 }
 
-func (j *job) GetSystemStatus() (string, error) {
+func (j *Job) GetSystemStatus() (string, error) {
 	j.RLock()
 	defer j.RUnlock()
 
@@ -39,14 +39,14 @@ func (j *job) GetSystemStatus() (string, error) {
 	return j.ProcessState.String(), nil
 }
 
-func (j *job) GetStartedDate() (time.Time, error) {
+func (j *Job) GetStartedDate() (time.Time, error) {
 	j.RLock()
 	defer j.RUnlock()
 
 	return j.startedDate, nil
 }
 
-func (j *job) GetExitedDate() (time.Time, error) {
+func (j *Job) GetExitedDate() (time.Time, error) {
 	j.RLock()
 	defer j.RUnlock()
 
